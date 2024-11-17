@@ -54,8 +54,8 @@ namespace Orleans.Runtime
                 while (delay > maxDelay)
                 {
                     delay -= maxDelay;
-                    var task2 = await Task.WhenAny(Task.Delay(maxDelay, cancellation.Token)).ConfigureAwait(false);
-                    if (task2.IsCanceled)
+                    await Task.Delay(maxDelay, cancellation.Token).ConfigureAwait(false);
+                    if (cancellation.IsCancellationRequested)
                     {
                         await Task.Yield();
                         expected = default;
@@ -63,8 +63,8 @@ namespace Orleans.Runtime
                     }
                 }
 
-                var task = await Task.WhenAny(Task.Delay(delay, cancellation.Token)).ConfigureAwait(false);
-                if (task.IsCanceled)
+                await Task.Delay(delay, cancellation.Token).ConfigureAwait(false);
+                if (cancellation.IsCancellationRequested)
                 {
                     await Task.Yield();
                     expected = default;
@@ -117,6 +117,7 @@ namespace Orleans.Runtime
         {
             this.expected = default;
             this.cancellation.Cancel();
+            this.cancellation.Dispose();
         }
     }
 }
